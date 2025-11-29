@@ -13,6 +13,7 @@ from datetime import datetime
 sys.path.insert(0, str(Path(__file__).parent))
 
 from collectors.github_trending import GitHubTrendingCollector
+from collectors.rss_collector import RSSCollector
 from senders.telegram_sender import TelegramSender
 
 
@@ -47,15 +48,39 @@ def main():
     except Exception as e:
         print(f"❌ GitHub 수집 오류: {e}")
 
-    # 2. 텔레그램 발송
+    # 2. RSS 뉴스 수집
+    print("\n📰 Tech 뉴스 수집 중...")
+    try:
+        rss_collector = RSSCollector(use_ai_summary=True, max_per_source=3)
+        rss_results = rss_collector.collect_all()
+
+        if rss_results:
+            # 텔레그램용 포맷
+            results['rss'] = rss_collector.format_telegram(rss_results, max_items=8)
+            print(f"✅ RSS 뉴스 수집 완료")
+        else:
+            print("⚠️ RSS 뉴스 수집 실패")
+    except Exception as e:
+        print(f"❌ RSS 수집 오류: {e}")
+
+    # 3. 텔레그램 발송
     print("\n📤 텔레그램 발송 중...")
     sender = TelegramSender()
 
-    if sender.enabled and results.get('github'):
+    if sender.enabled and (results.get('github') or results.get('rss')):
         message = f"🌅 *Daily Tech Digest*\n"
         message += f"📅 {datetime.now().strftime('%Y년 %m월 %d일')}\n\n"
-        message += results['github']
-        message += "\n---\n"
+
+        # GitHub Trending
+        if results.get('github'):
+            message += results['github']
+            message += "\n"
+
+        # RSS 뉴스
+        if results.get('rss'):
+            message += results['rss']
+
+        message += "---\n"
         message += "_🤖 Powered by News Aggregator_"
 
         sender.send_message(message)

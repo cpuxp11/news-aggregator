@@ -6,6 +6,9 @@ python-dotenv>=1.0.0
 # AI Summary
 google-generativeai>=0.8.0
 
+# RSS Feed Parser (10x faster than feedparser)
+fastfeedparser>=0.1.1
+
 # X (Twitter) - Optional
 twikit>=2.0.0
 aiofiles>=23.0.0
