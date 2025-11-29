@@ -1,0 +1,16 @@
+# Python
+venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Environment
+.env
+cookies.json
+
+# Output (로컬용)
+output/
+
+# IDE
+.vscode/
+.idea/
